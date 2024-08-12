@@ -9,23 +9,18 @@ import {
   Grid,
   IconButton,
   InputAdornment,
-  Snackbar,
   TextField,
   Typography,
-  Alert,
 } from "@mui/material";
 import LockIcon from "@mui/icons-material/Lock";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import * as yup from "yup";
 import useUsuarioController, { FormData } from "./userUsuarioController";
-import VerUsuario from "./Ver";
 
 const CriarUsuario = (): ReactElement => {
   const { onSubmit } = useUsuarioController();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [formSubmitted, setFormSubmitted] = useState(false);
 
   const validationSchema = yup.object().shape({
     nome: yup
@@ -54,7 +49,6 @@ const CriarUsuario = (): ReactElement => {
   });
 
   const validate = (values: FormData) => {
-    if (formSubmitted) return {}; // Skip validation if form was successfully submitted
     try {
       validationSchema.validateSync(values, { abortEarly: false });
       return {};
@@ -64,21 +58,6 @@ const CriarUsuario = (): ReactElement => {
         return errors;
       }, {});
     }
-  };
-
-  const handleFormSubmit = async (values: FormData, form: any) => {
-    try {
-      await onSubmit(values); // Assuming onSubmit is modified to handle the form submission
-      setOpenSnackbar(true);
-      setFormSubmitted(true); // Mark form as submitted
-      form.reset(); // Clear the form fields
-    } catch (error) {
-      console.error("Failed to submit the form", error);
-    }
-  };
-
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
   };
 
   return (
@@ -99,16 +78,13 @@ const CriarUsuario = (): ReactElement => {
           Cadastro
         </Typography>
         <Form
-          onSubmit={handleFormSubmit}
+          onSubmit={onSubmit}
           validate={validate}
-          render={({ handleSubmit, form }) => (
+          render={({ handleSubmit }) => (
             <Box
               component="form"
               noValidate
-              onSubmit={(event) => {
-                event.preventDefault();
-                handleSubmit();
-              }}
+              onSubmit={handleSubmit}
               sx={{ mt: 3 }}
             >
               <Grid container spacing={2}>
@@ -254,19 +230,8 @@ const CriarUsuario = (): ReactElement => {
             </Box>
           )}
         />
-        <Snackbar
-          open={openSnackbar}
-          autoHideDuration={6000}
-          onClose={handleCloseSnackbar}
-          message="Cadastro realizado com sucesso!"
-        >
-          <Alert onClose={handleCloseSnackbar} severity="success">
-            Cadastro realizado com sucesso!
-          </Alert>
-        </Snackbar>
       </Box>
     </Container>
-    
   );
 };
 
